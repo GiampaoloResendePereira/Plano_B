@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
 function CadastroCliente() {
+    const navigate = useNavigate()  ;
     const [nome, setNome] = useState('');
     const [sobrenome, setSobrenome] = useState('');
     const [cpf, setCpf] = useState('');
@@ -20,7 +21,7 @@ function CadastroCliente() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const navigate = useNavigate();
+    
 
     const handleCepChange = (e) => {
         const cepValue = e.target.value;
