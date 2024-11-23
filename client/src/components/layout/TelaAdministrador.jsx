@@ -1,10 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../../assets/img/logo.png'; 
 import React from 'react';
-import GerenciamentoEntrega from '../pages/GerenciamentoEntrega';
+import GerenciamentoEntrega from '../TabelaEntregas/GerenciamentoEntrega';
 import { Navbar, Container, Nav } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../../context/AuthContext';
 
 
 const TelaAdministrador = () => {

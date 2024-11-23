@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TelaAdministrador from './components/layout/TelaAdministrador';
-import GerenciamentoEntrega from './components/TabelaEntrega/GerenciamentoEntrega'; 
+import GerenciamentoEntrega from './components/TabelaEntregas/GerenciamentoEntrega';
 import EditarParametro from './components/pages/EditarParametro';
 import CadastroCliente from './components/FormCliente/CadastroCliente';
 import Login from './components/pages/Login';
@@ -13,10 +13,9 @@ import TelaCliente from './components/layout/TelaCliente';
 import CalculoFrete from './components/pages/CalculoFrete';
 
 
-
 function App() {
   return (
-    
+    <AuthProvider>
       <Router>
         <Routes>
           {/* Rotas */}
@@ -31,7 +30,7 @@ function App() {
           <Route path="/editar-parametro" element={<EditarParametro />} />                       
         </Routes>
       </Router>
-    
+    </AuthProvider>
   );
 }
 

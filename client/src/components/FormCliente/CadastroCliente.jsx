@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
-function CadastroCliente() {
+function CadastroCliente({ titulo, txtBtn, handleSubmit, id, tipo }) {
     const navigate = useNavigate()  ;
     const [nome, setNome] = useState('');
     const [sobrenome, setSobrenome] = useState('');
@@ -21,7 +21,68 @@ function CadastroCliente() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    
+    useEffect(() => {
+        if (id) {
+          baixarCliente(id);
+        }
+      }, []);
+
+    async function baixarCliente(id) {
+        try {
+          const resposta = await fetch(`http://localhost:5000/aulas/${id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          const respostaJSON = await resposta.json();
+          if (!resposta.ok) {
+            console.debug('Erro ao baixar cadastro', respostaJSON);
+          } else {
+            setNome(respostaJSON.nome);
+            setTurma(respostaJSON.sobrenome);
+            setCpf(respostaJSON.cpf);
+            setTelefone(respostaJSON.telefone);
+            setDataNascimento(respostaJSON.data_nascimento);
+            setCep(respostaJSON.cep);
+            setDataNascimento(respostaJSON.rua);
+            setCep(respostaJSON.numero);
+            setRua(respostaJSON.bairro);
+            setNumero(respostaJSON.numero);
+            setBairro(respostaJSON.bairro);
+            setCidade(respostaJSON.cidade);
+            setEstado(respostaJSON.estado);
+            setEmail(respostaJSON.email);
+            setSenha(respostaJSON.senha);
+            console.log(respostaJSON);
+          }
+        } catch (error) {
+          console.debug('Erro ao baixar cadastro', error);
+        }
+      }
+
+      function submit(e) {
+        e.preventDefault();
+        //Criando objeto que será encaminhado para o POST da AP
+        const infoCadastro = {
+          nome: nome,
+          sobrenome: sobrenome,
+          cpf: cpf,
+          telefone: telefone,
+          data_nascimento: dataNascimento,
+          cep: cep,
+          rua: rua,
+          numero: numero,
+          bairro: bairro,
+          cidade: cidade,
+          estado: estado,
+          email: email,
+          senha: senha,
+          chave: null,
+        };
+        handleSubmit(infoCadastro,id);
+        navigate(`/cadastrar-cliente/${tipo}`);
+      }
 
     const handleCepChange = (e) => {
         const cepValue = e.target.value;

@@ -2,46 +2,48 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/img/logo.png';
 
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-    const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    //verificando se o valor da variável para direcionar a tela correta
+  function verificar(UsuaLogin) {
+    //fazendo a tratativa em propos
+    if (UsuaLogin === "admin") {
+      navigate("/administrador");
+    } else if (UsuaLogin === "cliente") {
+      navigate("/cliente");
 
-        try {
-            const response = await axios.post('http://localhost:5000/login', { email, senha });
+    } else {
+      alert("credenciais incorretas")
+    }
 
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-                login();
-                if (response.data.role === 'admin') {
-                    navigate('/administrador'); // Redireciona para a tela de administrador
-                } else if (response.data.role === 'cliente') {
-                    navigate('/cliente'); // Redireciona para a tela de cliente
-                }
-            } else {
-                alert('Email ou senha incorretos');
-            }
-        } catch (error) {
-            console.error('Erro na autenticação: ', error);
-            alert('Email ou senha incorretos');
-        }
-    };
+  }
 
-    const handleCadastro = () => {
-        navigate('/cadastrar-cliente'); // Redireciona para a tela de cadastro de cliente
-    };
+  //colocar o evento handlelogin dentro de logintipo
+  const handleLogin = (e) => {
+    e.preventDefault();
+    let UsuaLogin = "";
 
-    const handleRecuperacaoSenha = () => {
-        navigate('/recuperacao-senha'); // Redireciona para a tela de recuperação de senha
-    };
+    if (email === "admin@gmail.com" && senha === "admin123") {
+       UsuaLogin = "admin";
+       verificar(UsuaLogin);
+      // chamando function para direcionar o usuário.
+    } else if (email === "cliente@gmail.com" && senha === "cliente123") {
+       UsuaLogin = "cliente"
+       verificar(UsuaLogin);
+    } else if (email === "motoboy@gmail.com" && senha === "motoboy123") {
+      //verificar();
+    } else {
+      alert("Credenciais incorretas para Login.");
+    }
+
+
+  };
 
     return (
         <div style={{
@@ -66,7 +68,7 @@ const Login = () => {
             >
                 <img src={logo} alt="Logo" className="login-logo" style={{ width: '250px', height: 'auto', marginBottom: '20px' }} />
 
-                <form className="login-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <form className="login-form" onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div className="mb-3">
                         <label htmlFor="email" className="form-label">Email:</label>
                         <input
