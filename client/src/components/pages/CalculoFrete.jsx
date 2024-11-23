@@ -1,81 +1,108 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
-function CalculoFrete({ clienteNome }) {
-  const navigate = useNavigate();
+function CalculoFrete() {
   const [cepOrigem, setCepOrigem] = useState('');
   const [cepDestino, setCepDestino] = useState('');
   const [peso, setPeso] = useState('');
+  const [largura, setLargura] = useState('');
+  const [altura, setAltura] = useState('');
+  const [comprimento, setComprimento] = useState('');
   const [valorFrete, setValorFrete] = useState(null);
   const [distancia, setDistancia] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [errorCepOrigem, setErrorCepOrigem] = useState('');
   const [errorCepDestino, setErrorCepDestino] = useState('');
   const [errorPeso, setErrorPeso] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [errorLargura, setErrorLargura] = useState('');
+  const [errorAltura, setErrorAltura] = useState('');
+  const [errorComprimento, setErrorComprimento] = useState('');
+  const [errorApi, setErrorApi] = useState('');
 
-  const validarCep = (cep) => /^[0-9]{5}-[0-9]{3}$/.test(cep);
-  const validarPeso = (peso) => /^[0-9]+(\.[0-9]{1,2})?$/.test(peso);
+  const validateForm = () => {
+    let valid = true;
+    const maxLargura = 50; // Máximo de 50 cm
+    const maxAltura = 50; // Máximo de 50 cm
+    const maxComprimento = 60; // Máximo de 60 cm
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    let isValid = true;
-    setErrorCepOrigem('');
-    setErrorCepDestino('');
-    setErrorPeso('');
-    setLoading(true);
-
-    if (!validarCep(cepOrigem)) {
-      setErrorCepOrigem('CEP de origem inválido. Formato correto: XXXXX-XXX');
-      isValid = false;
+    if (!cepOrigem) {
+      setErrorCepOrigem('CEP de origem é obrigatório.');
+      valid = false;
+    } else {
+      setErrorCepOrigem('');
     }
 
-    if (!validarCep(cepDestino)) {
-      setErrorCepDestino('CEP de destino inválido. Formato correto: XXXXX-XXX');
-      isValid = false;
+    if (!cepDestino) {
+      setErrorCepDestino('CEP de destino é obrigatório.');
+      valid = false;
+    } else {
+      setErrorCepDestino('');
     }
 
-    if (!validarPeso(peso)) {
-      setErrorPeso('Peso inválido. Formato correto: um número positivo com até duas casas decimais.');
-      isValid = false;
+    if (!peso || isNaN(peso) || parseFloat(peso) <= 0) {
+      setErrorPeso('Peso deve ser um número positivo.');
+      valid = false;
+    } else {
+      setErrorPeso('');
     }
 
-    if (isValid) {
-      try {
-        const response = await axios.post('http://localhost:5000/calcular-frete', {
-          cepOrigem,
-          cepDestino,
-          peso,
-        });
-
-        const { distanciaEmKm, valorFrete } = response.data;
-        setDistancia(distanciaEmKm);
-        setValorFrete(`R$ ${parseFloat(valorFrete).toFixed(2).replace('.', ',')}`);
-
-        alert('Cálculo do frete realizado com sucesso!');
-      } catch (error) {
-        console.error('Erro ao calcular frete: ', error);
-        alert('Erro ao calcular frete!');
-      }
+    if (!largura || isNaN(largura) || parseFloat(largura) <= 0 || parseFloat(largura) > maxLargura) {
+      setErrorLargura(`Largura deve ser um número positivo até ${maxLargura} cm.`);
+      valid = false;
+    } else {
+      setErrorLargura('');
     }
 
-    setLoading(false);
+    if (!altura || isNaN(altura) || parseFloat(altura) <= 0 || parseFloat(altura) > maxAltura) {
+      setErrorAltura(`Altura deve ser um número positivo até ${maxAltura} cm.`);
+      valid = false;
+    } else {
+      setErrorAltura('');
+    }
+
+    if (!comprimento || isNaN(comprimento) || parseFloat(comprimento) <= 0 || parseFloat(comprimento) > maxComprimento) {
+      setErrorComprimento(`Comprimento deve ser um número positivo até ${maxComprimento} cm.`);
+      valid = false;
+    } else {
+      setErrorComprimento('');
+    }
+
+    return valid;
   };
 
-  const handleSolicitarFrete = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setErrorApi('');
+
     try {
-      await axios.post('http://localhost:5000/solicitar-frete', {
+      const response = await axios.post('/calculo-frete', {
         cepOrigem,
         cepDestino,
         peso,
-        distancia,
-        valorFrete,
+        largura,
+        altura,
+        comprimento
       });
-      navigate('/solicitacao-frete');
+
+      setValorFrete(response.data.valor);
+      setDistancia(response.data.distancia);
+      // Limpar os campos após sucesso
+      setCepOrigem('');
+      setCepDestino('');
+      setPeso('');
+      setLargura('');
+      setAltura('');
+      setComprimento('');
     } catch (error) {
-      console.error('Erro ao solicitar frete: ', error);
-      alert('Erro ao solicitar frete!');
+      console.error('Erro ao calcular frete:', error);
+      setErrorApi('Ocorreu um erro ao calcular o frete. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,6 +147,42 @@ function CalculoFrete({ clienteNome }) {
           {errorPeso && <div className="text-danger">{errorPeso}</div>}
         </div>
 
+        <div className="mb-3">
+          <label htmlFor="largura" className="form-label">Largura (cm)</label>
+          <input
+            type="text"
+            className="form-control"
+            value={largura}
+            onChange={(e) => setLargura(e.target.value)}
+            placeholder="Digite a largura"
+          />
+          {errorLargura && <div className="text-danger">{errorLargura}</div>}
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="altura" className="form-label">Altura (cm)</label>
+          <input
+            type="text"
+            className="form-control"
+            value={altura}
+            onChange={(e) => setAltura(e.target.value)}
+            placeholder="Digite a altura"
+          />
+          {errorAltura && <div className="text-danger">{errorAltura}</div>}
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="comprimento" className="form-label">Comprimento (cm)</label>
+          <input
+            type="text"
+            className="form-control"
+            value={comprimento}
+            onChange={(e) => setComprimento(e.target.value)}
+            placeholder="Digite o comprimento"
+          />
+          {errorComprimento && <div className="text-danger">{errorComprimento}</div>}
+        </div>
+
         {loading && (
           <div className="d-flex justify-content-center">
             <div className="spinner-border text-primary" role="status">
@@ -128,9 +191,15 @@ function CalculoFrete({ clienteNome }) {
           </div>
         )}
 
+        {errorApi && (
+          <div className="alert alert-danger">
+            {errorApi}
+          </div>
+        )}
+
         {valorFrete && !loading && (
           <div className="alert alert-info">
-            <strong>Valor do frete: </strong> {valorFrete}
+            <strong>Valor do frete: </strong> R$ {valorFrete.toFixed(2)}
           </div>
         )}
 
@@ -143,9 +212,6 @@ function CalculoFrete({ clienteNome }) {
         <div className="d-flex justify-content-between">
           <button type="submit" className="btn btn-danger" disabled={loading}>
             Calcular Frete
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={handleSolicitarFrete}>
-            Solicitar Frete
           </button>
         </div>
       </form>

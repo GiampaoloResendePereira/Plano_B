@@ -1,67 +1,47 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../../assets/img/logo.png';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navbar, Container, Nav } from 'react-bootstrap';
-import CalculoFrete from '../pages/CalculoFrete';
-import { useNavigate } from "react-router-dom";
-import axios from 'axios'; // Importar Axios para fazer a requisição
+import { Link, useNavigate } from 'react-router-dom'; // Adicionando Link para navegação
+import SolicitacaoFrete from '../FormCliente/SolicitacaoFrete';
 
 function TelaCliente() {
-  const [clienteNome, setClienteNome] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook para navegação entre as rotas
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-
-    const fetchClienteData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/cliente-dados', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const { nome } = response.data;
-        setClienteNome(nome);
-      } catch (error) {
-        console.error('Erro ao buscar dados do cliente: ', error);
-        localStorage.removeItem('token');
-        navigate('/');
-      }
-    };
-
-    if (token) {
-      fetchClienteData();
-    } else {
-      navigate('/');
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
+  // Função de navegação para a tela de login (ou página inicial)
+  const handleLoginLogout = () => {
+    navigate("/"); // Redireciona para a tela de login ou página inicial
   };
+
+  
 
   return (
     <div>
-      <Navbar bg="danger" variant="dark" />
+      {/* Barra superior de navegação */}
+      <Navbar bg="danger" variant="dark"></Navbar>
+
+      {/* Barra de navegação principal */}
       <Navbar bg="dark" variant="dark">
         <Container>
-          <img src={logo} alt="Logo" height="50" />
+          <Link className="navbar-brand" to="/">
+            <img src={logo} alt="Logo" height="50" />
+          </Link>
           <Nav className="me-auto">
-            <Nav.Link href="/cliente">Calcular Frete</Nav.Link>
-            <Nav.Link href="/solicitacao-frete">Solicitação de Frete</Nav.Link>
+            <Nav.Link href="/cliente">Solicitação Frete</Nav.Link>
+            <Nav.Link href="/calculo-frete">Calculo Frete</Nav.Link>
           </Nav>
           <div className="d-flex align-items-center text-white">
-            <span className="me-3">Olá, {clienteNome}</span>
-            <button className="btn btn-secondary" onClick={handleLogout}>
+            <button className="btn btn-secondary" onClick={handleLoginLogout}>
               Sair
             </button>
           </div>
         </Container>
       </Navbar>
 
-      <CalculoFrete />
+      {/* Exibição da página CalculoFrete */}
+      <SolicitacaoFrete />
     </div>
   );
 }
 
-export default TelaCliente;
+export default TelaCliente; // Exportando TelaCliente

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
@@ -40,7 +40,7 @@ function CadastroCliente({ titulo, txtBtn, handleSubmit, id, tipo }) {
             console.debug('Erro ao baixar cadastro', respostaJSON);
           } else {
             setNome(respostaJSON.nome);
-            setTurma(respostaJSON.sobrenome);
+            setSobrenome(respostaJSON.sobrenome);
             setCpf(respostaJSON.cpf);
             setTelefone(respostaJSON.telefone);
             setDataNascimento(respostaJSON.data_nascimento);

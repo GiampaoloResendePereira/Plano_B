@@ -2,79 +2,32 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Para navegação entre telas
 
-function SolicitacaoFrete({ location }) {
+function SolicitacaoFrete() {
+  const [remetente, setRemetente] = useState({
+    nome: '',
+    telefone: '',
+    email: '',
+    endereco: { cep: '' }
+  });
+
+  const [destinatario, setDestinatario] = useState({
+    nome: '',
+    telefone: '',
+    email: '',
+    endereco: { cep: '' }
+  });
+
+  const [frete, setFrete] = useState(null);
   const navigate = useNavigate();
 
-  // Dados de remetente e destinatário (com base nos dados passados da tela anterior)
-  const [remetente, setRemetente] = useState(location.state.remetente);
-  const [destinatario, setDestinatario] = useState(location.state.destinatario);
-
-  // Frete calculado
-  const [frete, setFrete] = useState(null);
-
-  useEffect(() => {
-    if (remetente && destinatario) {
-      calcularFrete();
-    }
-  }, [remetente, destinatario]);
-
-  // Função para calcular o frete com base no CEP
-  const calcularFrete = async () => {
-    if (!remetente.endereco.cep || !destinatario.endereco.cep) {
-      alert('Por favor, preencha os CEPs para cálculo do frete.');
-      return;
-    }
-
-    try {
-      const response = await axios.post('http://localhost:5000/calcular-frete', {
-        cepOrigem: remetente.endereco.cep,
-        cepDestino: destinatario.endereco.cep,
-        peso: location.state.peso, // Certifique-se de passar o peso da tela anterior
-      });
-
-      const { distanciaEmKm, valorFrete } = response.data;
-      setFrete(valorFrete.toFixed(2));
-    } catch (error) {
-      console.error('Erro ao calcular frete: ', error);
-      alert('Erro ao calcular frete!');
-    }
-  };
-
-  // Função para validar os campos antes de salvar
-  const validarCampos = () => {
-    if (!remetente.nome || !remetente.telefone || !remetente.email || !remetente.endereco.cep) {
-      alert('Por favor, preencha todos os dados do remetente.');
-      return false;
-    }
-    if (!destinatario.nome || !destinatario.telefone || !destinatario.email || !destinatario.endereco.cep) {
-      alert('Por favor, preencha todos os dados do destinatário.');
-      return false;
-    }
-    if (!frete) {
-      alert('O valor do frete não foi calculado.');
-      return false;
-    }
-    return true;
-  };
-
-  // Função para salvar a solicitação no banco de dados
   const handleSalvarSolicitacao = async () => {
-    if (!validarCampos()) {
-      return; // Não prosseguir caso a validação falhe
-    }
-
     try {
-      await axios.post('http://localhost:5000/solicitar-frete', {
-        remetente,
-        destinatario,
-        frete,
-      });
-      alert('Solicitação de frete salva com sucesso!');
-      // Após salvar, redireciona para a tela de acompanhamento
-      navigate('/acompanhamento');
+      const resposta = await axios.post('/api/calculoFrete', { remetente, destinatario });
+      setFrete(resposta.data.valor);
+      // Navegar para outra página se necessário
+      // navigate('/outra-pagina');
     } catch (error) {
-      console.error('Erro ao salvar solicitação de frete: ', error);
-      alert('Erro ao salvar solicitação de frete!');
+      console.error('Erro ao salvar solicitação:', error);
     }
   };
 

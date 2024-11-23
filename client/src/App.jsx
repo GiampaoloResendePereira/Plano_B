@@ -15,7 +15,7 @@ import CalculoFrete from './components/pages/CalculoFrete';
 
 function App() {
   return (
-    <AuthProvider>
+    
       <Router>
         <Routes>
           {/* Rotas */}
@@ -30,7 +30,7 @@ function App() {
           <Route path="/editar-parametro" element={<EditarParametro />} />                       
         </Routes>
       </Router>
-    </AuthProvider>
+    
   );
 }
 
