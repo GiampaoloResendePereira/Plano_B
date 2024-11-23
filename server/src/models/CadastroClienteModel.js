@@ -17,7 +17,7 @@ export async function createCadastroCliente(cliente) {
     cliente.sobrenome,
     cliente.cpf,
     cliente.telefone,
-    cliente.dataNascimento,
+    cliente.data_nascimento,
     cliente.cep,
     cliente.rua,
     cliente.numero,
