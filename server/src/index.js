@@ -9,6 +9,7 @@ import { cadastroSolicitacao } from './controllers/SolicitacaoFreteController.js
 import { atualizandoParametro } from './controllers/EditarParametroController.js';
 import { mostrandoEntrga, mostrandoUmaEntrega } from './controllers/GerencimentoEntregaController.js';
 
+
 // Instanciando objeto express
 const app = express();
 const porta = 5000;
