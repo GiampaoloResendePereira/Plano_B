@@ -9,7 +9,7 @@ export async function createCadastroCliente(cliente) {
   console.log('CadastroClienteModel: Create');
   const conexao = mysql.createPool(db);
   const sql = `
-    INSERT INTO clientes (nome, sobrenome, cpf, telefone, data_nascimento, cep, rua, numero, bairro, cidade, estado, email, senha)
+    INSERT INTO cadastro_cliente (nome, sobrenome, cpf, telefone, data_nascimento, cep, rua, numero, bairro, cidade, estado, email, senha)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const params = [

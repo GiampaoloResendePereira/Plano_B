@@ -6,6 +6,8 @@ import cors from 'cors';
 import { cadastroCliente } from './controllers/CadastroClienteController.js';
 import { cadastroCalculo } from './controllers/CalculoFreteController.js';
 import { cadastroSolicitacao } from './controllers/SolicitacaoFreteController.js';
+import { atualizandoParametro } from './controllers/EditarParametroController.js';
+import { mostrandoEntrga, mostrandoUmaEntrega } from './controllers/GerencimentoEntregaController.js';
 
 // Instanciando objeto express
 const app = express();
@@ -24,6 +26,9 @@ app.get('/', (req, res) => {
 app.post('/cadastrar-cliente', cadastroCliente); // Criar um novo cliente
 app.post('/solicitacao-frete', cadastroSolicitacao); // Criar um novo solicitação frete
 app.post('/calculo-frete', cadastroCalculo); // Criar um novo calculo frete
+app.put('/parametro/:id',atualizandoParametro);// atualizando parametros do frete
+app.get('/entrega',mostrandoEntrga); // Visualizar entregas
+app.get('/entrega/:id',mostrandoUmaEntrega);// Visualizar uma entrega
 
 
 // Inicializando servidor
