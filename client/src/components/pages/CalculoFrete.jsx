@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function CalculoFrete() {
   const [cepOrigem, setCepOrigem] = useState('');
@@ -12,209 +13,198 @@ function CalculoFrete() {
   const [valorFrete, setValorFrete] = useState(null);
   const [distancia, setDistancia] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [errorCepOrigem, setErrorCepOrigem] = useState('');
-  const [errorCepDestino, setErrorCepDestino] = useState('');
-  const [errorPeso, setErrorPeso] = useState('');
-  const [errorLargura, setErrorLargura] = useState('');
-  const [errorAltura, setErrorAltura] = useState('');
-  const [errorComprimento, setErrorComprimento] = useState('');
-  const [errorApi, setErrorApi] = useState('');
+  const [error, setError] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = () => {
-    let valid = true;
-    const maxLargura = 50; // Máximo de 50 cm
-    const maxAltura = 50; // Máximo de 50 cm
-    const maxComprimento = 60; // Máximo de 60 cm
+    let errors = [];
 
-    if (!cepOrigem) {
-      setErrorCepOrigem('CEP de origem é obrigatório.');
-      valid = false;
-    } else {
-      setErrorCepOrigem('');
+    if (!cepOrigem || cepOrigem.length !== 8 || isNaN(cepOrigem)) {
+      errors.push("CEP de origem inválido. Deve conter 8 números.");
     }
 
-    if (!cepDestino) {
-      setErrorCepDestino('CEP de destino é obrigatório.');
-      valid = false;
-    } else {
-      setErrorCepDestino('');
+    if (!cepDestino || cepDestino.length !== 8 || isNaN(cepDestino)) {
+      errors.push("CEP de destino inválido. Deve conter 8 números.");
     }
 
     if (!peso || isNaN(peso) || parseFloat(peso) <= 0) {
-      setErrorPeso('Peso deve ser um número positivo.');
-      valid = false;
-    } else {
-      setErrorPeso('');
+      errors.push("Peso inválido. Deve ser um número positivo.");
     }
 
-    if (!largura || isNaN(largura) || parseFloat(largura) <= 0 || parseFloat(largura) > maxLargura) {
-      setErrorLargura(`Largura deve ser um número positivo até ${maxLargura} cm.`);
-      valid = false;
-    } else {
-      setErrorLargura('');
+    if (!largura || isNaN(largura) || parseFloat(largura) <= 0 || parseFloat(largura) > 50) {
+      errors.push("Largura inválida. Deve ser um número positivo até 50 cm.");
     }
 
-    if (!altura || isNaN(altura) || parseFloat(altura) <= 0 || parseFloat(altura) > maxAltura) {
-      setErrorAltura(`Altura deve ser um número positivo até ${maxAltura} cm.`);
-      valid = false;
-    } else {
-      setErrorAltura('');
+    if (!altura || isNaN(altura) || parseFloat(altura) <= 0 || parseFloat(altura) > 50) {
+      errors.push("Altura inválida. Deve ser um número positivo até 50 cm.");
     }
 
-    if (!comprimento || isNaN(comprimento) || parseFloat(comprimento) <= 0 || parseFloat(comprimento) > maxComprimento) {
-      setErrorComprimento(`Comprimento deve ser um número positivo até ${maxComprimento} cm.`);
-      valid = false;
-    } else {
-      setErrorComprimento('');
+    if (!comprimento || isNaN(comprimento) || parseFloat(comprimento) <= 0 || parseFloat(comprimento) > 60) {
+      errors.push("Comprimento inválido. Deve ser um número positivo até 60 cm.");
     }
 
-    return valid;
+    if (errors.length > 0) {
+      setError(errors.join(' '));
+      return false;
+    }
+
+    setError('');
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
 
     setLoading(true);
-    setErrorApi('');
 
     try {
-      const response = await axios.post('/calculo-frete', {
+      const response = await axios.post('http://localhost:5000/calculo-frete', {
         cepOrigem,
         cepDestino,
         peso,
         largura,
         altura,
-        comprimento
+        comprimento,
       });
 
       setValorFrete(response.data.valor);
       setDistancia(response.data.distancia);
-      // Limpar os campos após sucesso
-      setCepOrigem('');
-      setCepDestino('');
-      setPeso('');
-      setLargura('');
-      setAltura('');
-      setComprimento('');
-    } catch (error) {
-      console.error('Erro ao calcular frete:', error);
-      setErrorApi('Ocorreu um erro ao calcular o frete. Tente novamente.');
+      setShowModal(true);
+    } catch (err) {
+      console.error("Erro ao calcular frete:", err);
+      setError("Erro ao calcular frete. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleContinue = () => {
+    setShowModal(false);
+    navigate('/solicitacao-frete');
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setCepOrigem('');
+    setCepDestino('');
+    setPeso('');
+    setLargura('');
+    setAltura('');
+    setComprimento('');
+  };
+
   return (
     <div className="container bg-light p-5">
       <h2 className="bg-dark text-white rounded p-3 mb-4">Cálculo de Frete</h2>
-
+      {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
+        {/* Campo CEP Origem */}
         <div className="mb-3">
           <label htmlFor="cepOrigem" className="form-label">CEP de Origem</label>
           <input
             type="text"
             className="form-control"
+            id="cepOrigem"
             value={cepOrigem}
             onChange={(e) => setCepOrigem(e.target.value)}
             placeholder="Digite o CEP de origem"
           />
-          {errorCepOrigem && <div className="text-danger">{errorCepOrigem}</div>}
         </div>
 
+        {/* Campo CEP Destino */}
         <div className="mb-3">
           <label htmlFor="cepDestino" className="form-label">CEP de Destino</label>
           <input
             type="text"
             className="form-control"
+            id="cepDestino"
             value={cepDestino}
             onChange={(e) => setCepDestino(e.target.value)}
             placeholder="Digite o CEP de destino"
           />
-          {errorCepDestino && <div className="text-danger">{errorCepDestino}</div>}
         </div>
 
+        {/* Peso */}
         <div className="mb-3">
           <label htmlFor="peso" className="form-label">Peso (kg)</label>
           <input
-            type="text"
+            type="number"
             className="form-control"
+            id="peso"
             value={peso}
             onChange={(e) => setPeso(e.target.value)}
-            placeholder="Digite o peso"
+            placeholder="Digite o peso em kg"
           />
-          {errorPeso && <div className="text-danger">{errorPeso}</div>}
         </div>
 
+        {/* Largura */}
         <div className="mb-3">
           <label htmlFor="largura" className="form-label">Largura (cm)</label>
           <input
-            type="text"
+            type="number"
             className="form-control"
+            id="largura"
             value={largura}
             onChange={(e) => setLargura(e.target.value)}
-            placeholder="Digite a largura"
+            placeholder="Digite a largura em cm"
           />
-          {errorLargura && <div className="text-danger">{errorLargura}</div>}
         </div>
 
+        {/* Altura */}
         <div className="mb-3">
           <label htmlFor="altura" className="form-label">Altura (cm)</label>
           <input
-            type="text"
+            type="number"
             className="form-control"
+            id="altura"
             value={altura}
             onChange={(e) => setAltura(e.target.value)}
-            placeholder="Digite a altura"
+            placeholder="Digite a altura em cm"
           />
-          {errorAltura && <div className="text-danger">{errorAltura}</div>}
         </div>
 
+        {/* Comprimento */}
         <div className="mb-3">
           <label htmlFor="comprimento" className="form-label">Comprimento (cm)</label>
           <input
-            type="text"
+            type="number"
             className="form-control"
+            id="comprimento"
             value={comprimento}
             onChange={(e) => setComprimento(e.target.value)}
-            placeholder="Digite o comprimento"
+            placeholder="Digite o comprimento em cm"
           />
-          {errorComprimento && <div className="text-danger">{errorComprimento}</div>}
         </div>
 
-        {loading && (
-          <div className="d-flex justify-content-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="sr-only">Carregando...</span>
+        {/* Botão de Enviar */}
+        <button type="submit" className="btn btn-danger" disabled={loading}>
+          {loading ? 'Calculando...' : 'Calcular Frete'}
+        </button>
+      </form>
+
+      {/* Modal de Resultado */}
+      {showModal && (
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Resultado do Frete</h5>
+                <button type="button" className="btn-close" onClick={handleCancel}></button>
+              </div>
+              <div className="modal-body">
+                <p><strong>Valor do frete:</strong> R$ {valorFrete.toFixed(2)}</p>
+                <p><strong>Distância:</strong> {distancia.toFixed(2)} km</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={handleCancel}>Cancelar</button>
+                <button className="btn btn-primary" onClick={handleContinue}>Continuar</button>
+              </div>
             </div>
           </div>
-        )}
-
-        {errorApi && (
-          <div className="alert alert-danger">
-            {errorApi}
-          </div>
-        )}
-
-        {valorFrete && !loading && (
-          <div className="alert alert-info">
-            <strong>Valor do frete: </strong> R$ {valorFrete.toFixed(2)}
-          </div>
-        )}
-
-        {distancia !== null && !loading && (
-          <div className="alert alert-info mt-3">
-            Distância entre os CEPs: {distancia.toFixed(2)} km
-          </div>
-        )}
-
-        <div className="d-flex justify-content-between">
-          <button type="submit" className="btn btn-danger" disabled={loading}>
-            Calcular Frete
-          </button>
         </div>
-      </form>
+      )}
     </div>
   );
 }
