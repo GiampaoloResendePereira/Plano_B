@@ -11,6 +11,7 @@ import RecuperacaoSenha from './components/pages/RecuperacaoSenha';
 import SolicitacaoFrete from './components/FormCliente/SolicitacaoFrete';
 import TelaCliente from './components/layout/TelaCliente';
 import CalculoFrete from './components/pages/CalculoFrete';
+import Cadastro from './components/pages/Cadastro';
 
 
 function App() {
@@ -27,7 +28,8 @@ function App() {
           <Route path="/calculo-frete" element={<CalculoFrete />} />
           <Route path="/administrador" element={<TelaAdministrador />} />
           <Route path="/gerenciamento-entregas" element={<GerenciamentoEntrega />} />
-          <Route path="/editar-parametro" element={<EditarParametro />} />                       
+          <Route path="/editar-parametro" element={<EditarParametro />} /> 
+          <Route path="/cadastro" element={<Cadastro />} />                      
         </Routes>
       </Router>
     
@@ -35,3 +37,5 @@ function App() {
 }
 
 export default App;
+
+//npm install validator
